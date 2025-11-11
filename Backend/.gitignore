@@ -1,0 +1,39 @@
+# ───── Node & package managers ─────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# ───── Environment / secrets ─────
+.env
+.env.*.local
+
+# ───── Prisma ─────
+# generated client (will be re-generated)
+prisma/dev.db
+prisma/*.sqlite
+prisma/generated/
+
+# ───── Build artifacts ─────
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# ───── System / editor files ─────
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# ───── Logs / misc ─────
+logs/
+*.log
+npm-debug.log*
+debug.log*
+out/

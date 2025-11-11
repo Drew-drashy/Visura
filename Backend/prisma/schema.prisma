@@ -1,0 +1,217 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+/* ========================= Enums ========================= */
+enum JobType {
+  TEXT2VIDEO
+}
+
+enum JobStatus {
+  QUEUED
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELED
+}
+
+enum AssetKind {
+  OUTPUT_VIDEO
+  OUTPUT_THUMBNAIL
+  OUTPUT_CAPTIONS
+  OUTPUT_JSON_META
+}
+
+enum StorageProvider {
+  S3
+  SUPABASE
+  GCS
+  LOCAL
+}
+
+enum CreditReason {
+  GRANT
+  DEBIT_JOB
+  REFUND_JOB
+  ADJUSTMENT
+}
+
+/* ========================= Auth ========================= */
+model User {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  name           String?
+  passwordHash   String?
+  googleId       String?  @unique
+  credits        Int      @default(2)
+
+  oauthAccounts  OAuthAccount[]
+  sessions       Session[]
+  passwordResets PasswordReset[]
+  jobs           VideoJob[]
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+
+  @@index([deletedAt])
+}
+
+model OAuthAccount {
+  id              String   @id @default(cuid())
+  userId          String
+  provider        String
+  providerUserId  String
+  email           String?
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([provider, providerUserId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  accessToken  String?  @unique
+  refreshToken String?  @unique
+  userAgent    String?
+  ip           String?
+  expiresAt    DateTime
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model PasswordReset {
+  id         String   @id @default(cuid())
+  userId     String
+  token      String   @unique
+  expiresAt  DateTime
+  usedAt     DateTime?
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+/* ========================= Jobs (Text→Video) ========================= */
+model VideoJob {
+  id            String     @id @default(cuid())
+  userId        String
+  type          JobType
+  status        JobStatus  @default(QUEUED)
+
+  prompt        String
+
+  outputVideoId String?    // FK → Asset (OUTPUT_VIDEO)
+
+  costCredits   Int        @default(1)
+
+  externalRef   String?
+  errorMessage  String?
+  meta          Json?
+
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  outputVideo   Asset?     @relation("JobOutputVideo", fields: [outputVideoId], references: [id])
+
+  assets        Asset[]    @relation("JobAssets")
+  events        JobEvent[]
+
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@index([userId])
+  @@index([status, createdAt])
+  @@index([externalRef])
+}
+
+model JobEvent {
+  id      String    @id @default(cuid())
+  jobId   String
+  status  JobStatus
+  detail  String?
+  meta    Json?
+  at      DateTime  @default(now())
+
+  job     VideoJob  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId, at])
+}
+
+/* ========================= Assets & Storage ========================= */
+model Asset {
+  id              String        @id @default(cuid())
+  jobId           String?
+  kind            AssetKind
+  storageObjectId String
+
+  mimeType   String?
+  durationMs Int?
+  width      Int?
+  height     Int?
+  label      String?
+  sha256     String?
+
+  job           VideoJob?     @relation("JobAssets", fields: [jobId], references: [id], onDelete: SetNull)
+  storageObject StorageObject @relation(fields: [storageObjectId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([jobId])
+  @@index([kind])
+  @@index([sha256])
+}
+
+model StorageObject {
+  id        String          @id @default(cuid())
+  provider  StorageProvider
+  bucket    String?
+  region    String?
+  key       String?
+  publicUrl String?
+  sizeBytes BigInt?
+  expiresAt DateTime?
+  meta      Json?
+
+  assets    Asset[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([provider, bucket, key])
+  @@index([publicUrl])
+}
+
+/* ========================= Credits ========================= */
+model CreditLedger {
+  id        String       @id @default(cuid())
+  userId    String
+  delta     Int
+  reason    CreditReason
+  jobId     String?
+  note      String?
+  at        DateTime     @default(now())
+
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  job       VideoJob?    @relation(fields: [jobId], references: [id], onDelete: SetNull)
+
+  @@index([userId, at])
+  @@index([jobId])
+}
