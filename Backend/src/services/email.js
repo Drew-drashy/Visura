@@ -1,14 +1,28 @@
 import nodemailer from 'nodemailer';
 
+function assertEnv(varName) {
+  const value = process.env[varName];
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${varName}`);
+  }
+  return value;
+}
+
 export function getTransport() {
+  const host = process.env.SMTP_HOST || 'smtp.gmail.com';
+  const port = Number(process.env.SMTP_PORT || (host === 'smtp.gmail.com' ? 465 : 587));
+  const secure = process.env.SMTP_SECURE
+    ? process.env.SMTP_SECURE === 'true'
+    : port === 465;
+
+  const user = assertEnv('SMTP_USER');
+  const pass = assertEnv('SMTP_PASS');
+
   return nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT || 587),
-    secure: false,
-    auth: process.env.SMTP_USER && process.env.SMTP_PASS ? {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS
-    } : undefined
+    host,
+    port,
+    secure,
+    auth: { user, pass }
   });
 }
 

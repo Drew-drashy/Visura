@@ -12,7 +12,7 @@ const router = Router();
 router.post('/register', register);
 router.post('/login', login);
 
-// google oauth (send idToken from frontend google sign-in)
+
 router.post('/google', googleAuth);
 
 // token lifecycle

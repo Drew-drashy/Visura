@@ -35,6 +35,17 @@ function parseDuration(s) {
   return 1000 * 60 * 60 * 24 * 30;
 }
 
+function respondWithError(res, error, message = 'Internal server error', status = 500) {
+  console.error(error);
+  if (error?.status && error?.message) {
+    return res.status(error.status).json({ error: error.message });
+  }
+  if (error?.name === 'ValidationError') {
+    return res.status(400).json({ error: error.message });
+  }
+  return res.status(status).json({ error: message });
+}
+
 /** Auth flows */
 export async function register(req, res, next) {
   try {
@@ -56,7 +67,7 @@ export async function register(req, res, next) {
       refreshToken: session.refreshToken,
       user: { id: String(user._id), email: user.email, credits: user.credits, name: user.name }
     });
-  } catch (e) { next(e); }
+  } catch (e) { respondWithError(res, e, 'Failed to register user'); }
 }
 
 export async function login(req, res, next) {
@@ -78,7 +89,7 @@ export async function login(req, res, next) {
       refreshToken: session.refreshToken,
       user: { id: String(user._id), email: user.email, credits: user.credits, name: user.name }
     });
-  } catch (e) { next(e); }
+  } catch (e) { respondWithError(res, e, 'Failed to login'); }
 }
 
 export async function googleAuth(req, res, next) {
@@ -117,7 +128,7 @@ export async function googleAuth(req, res, next) {
       refreshToken: session.refreshToken,
       user: { id: String(userObj._id), email: userObj.email, credits: userObj.credits, name: userObj.name }
     });
-  } catch (e) { next(e); }
+  } catch (e) { respondWithError(res, e, 'Failed to authenticate with Google'); }
 }
 
 export async function refresh(req, res, next) {
@@ -137,7 +148,7 @@ export async function refresh(req, res, next) {
 
     const accessToken = signAccessToken(user);
     res.json({ accessToken });
-  } catch (e) { next(e); }
+  } catch (e) { respondWithError(res, e, 'Failed to refresh access token'); }
 }
 
 export async function logout(req, res, next) {
@@ -147,7 +158,7 @@ export async function logout(req, res, next) {
 
     await Session.deleteMany({ refreshToken });
     res.json({ ok: true });
-  } catch (e) { next(e); }
+  } catch (e) { respondWithError(res, e, 'Failed to logout'); }
 }
 
 export async function me(req, res, next) {
@@ -155,7 +166,7 @@ export async function me(req, res, next) {
     const user = await User.findById(req.user.id).select('email name credits createdAt').lean();
     if (!user) return res.status(404).json({ error: 'Not found' });
     res.json({ id: String(user._id), email: user.email, name: user.name, credits: user.credits, createdAt: user.createdAt });
-  } catch (e) { next(e); }
+  } catch (e) { respondWithError(res, e, 'Failed to fetch profile'); }
 }
 
 export async function forgotPassword(req, res, next) {
@@ -175,7 +186,9 @@ export async function forgotPassword(req, res, next) {
     await sendPasswordResetEmail(email, link);
 
     res.json({ message: 'If that email exists, a link has been sent.' });
-  } catch (e) { next(e); }
+  } catch (e) {
+    respondWithError(res, e, 'Failed to initiate password reset');
+  }
 }
 
 export async function resetPassword(req, res, next) {
@@ -198,5 +211,5 @@ export async function resetPassword(req, res, next) {
     await Session.deleteMany({ userId: user._id });
 
     res.json({ message: 'Password updated' });
-  } catch (e) { next(e); }
+  } catch (e) { respondWithError(res, e, 'Failed to reset password'); }
 }
