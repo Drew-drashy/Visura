@@ -79,7 +79,7 @@ const Navbar = ({ onMenuClick, sidebarWidth }: NavbarProps) => {
               boxShadow: 'none',
             }}
           >
-            New Project
+            Sign Up
           </Button>
         </Stack>
       </Toolbar>
