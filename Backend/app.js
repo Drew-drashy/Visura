@@ -1,23 +1,21 @@
-import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-
-import authRoutes from './src/routes/authRoutes.js';
-import { connectMongo } from './src/config/mongo.js';
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import mongoose from "mongoose";
+import videoRoutes from "./src/routes/videoRoutes.js";
 
 dotenv.config();
-
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 
-// Initialize DB connection
-connectMongo().catch((err) => {
-	console.error('Failed to connect to MongoDB', err);
-	process.exit(1);
-});
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log("Mongo connected"))
+  .catch(err => console.error("Mongo error", err));
 
-app.use('/api/auth', authRoutes);
-app.get('/', (_, res) => res.send('Auth backend up 🚀'));
+app.use("/api/videos", videoRoutes);
+
+app.get("/", (_, res) => res.send("Backend running 🚀"));
 
 export default app;
