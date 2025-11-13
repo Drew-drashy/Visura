@@ -1,4 +1,4 @@
-# ───── Node & package managers ─────
+# ─────────── Node.js / Express ───────────
 node_modules/
 npm-debug.log*
 yarn-debug.log*
@@ -8,32 +8,96 @@ package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
-# ───── Environment / secrets ─────
+# environment variables / secrets
 .env
 .env.*.local
+*.pem
+*.key
+*.crt
+*.p12
 
-# ───── Prisma ─────
-# generated client (will be re-generated)
+# Prisma
 prisma/dev.db
 prisma/*.sqlite
+prisma/migrations/
 prisma/generated/
+*.db
+*.sqlite
+*.sqlite3
+*.bak
+*.log
 
-# ───── Build artifacts ─────
-dist/
-build/
-coverage/
-*.tsbuildinfo
-
-# ───── System / editor files ─────
-.DS_Store
-Thumbs.db
-.vscode/
-.idea/
-*.swp
-
-# ───── Logs / misc ─────
+# logs
 logs/
 *.log
 npm-debug.log*
 debug.log*
 out/
+*.pid
+*.seed
+nohup.out
+
+# coverage / tests
+coverage/
+.nyc_output/
+jest-stare/
+*.lcov
+.cache/
+.vscode-test/
+__tests__/temp/
+test-output/
+
+# build artifacts
+dist/
+build/
+tmp/
+temp/
+uploads/
+exports/
+generated/
+public/uploads/
+
+# Redis / PM2 / Docker
+pids/
+*.pid
+*.pid.lock
+pm2.log
+.dockerignore
+docker-compose.override.yml
+*.tar
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+
+# OS files
+.DS_Store
+Thumbs.db
+Icon?
+ehthumbs.db
+Desktop.ini
+
+# macOS metadata
+.AppleDouble
+.LSOverride
+__MACOSX/
+
+# TypeScript
+*.tsbuildinfo
+
+# temporary backups
+*.bak
+*.tmp
+*.orig
+*.rej
+
+# ─────────── Optional: Local scripts / media ───────────
+/uploads/
+/backups/
+/videos/
+/frames_*/
+/ai_video_*/
