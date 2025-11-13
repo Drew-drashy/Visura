@@ -1,0 +1,98 @@
+# ─────────── Python / venv ───────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+*.spec
+
+# virtual environments
+venv/
+.env/
+.venv/
+env/
+ENV/
+*.env
+.env.*.local
+
+# pip / build
+build/
+dist/
+*.egg
+wheels/
+pip-wheel-metadata/
+
+# pytest / coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# logs
+*.log
+logs/
+nohup.out
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# FFmpeg / media outputs
+*.mp4
+*.wav
+*.mp3
+*.png
+*.jpg
+*.jpeg
+*.gif
+tmp/
+temp/
+__temp__/
+outputs/
+videos/
+frames_*/
+ai_video_*/
+fallback_*/
+veo_*/
+
+# generated AI content
+*.jsonl
+*.json.tmp
+*.cache
+*.ipynb_checkpoints
+
+# Prisma / Mongo / SQLite artifacts
+.prisma/
+dev.db
+*.sqlite
+*.db
+
+# Node (if backend shares JS packages)
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Docker / Compose
+*.pid
+docker-compose.override.yml
+.dockerignore
+
+# Cloud keys or secrets
+keys/
+secrets/
+*.pem
+*.crt
+*.key
+*.p12
+*.bak
+
+# OS temp files
+.DS_Store
+Icon?
+ehthumbs.db
