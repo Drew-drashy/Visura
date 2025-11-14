@@ -1,46 +1,77 @@
-  import {
-    Avatar,
-    Box,
-    Chip,
-    Divider,
-    Drawer,
-    type DrawerProps,
-    List,
-    ListItemButton,
-    ListItemIcon,
-    ListItemText,
-    Stack,
-    Toolbar,
-    Typography,
-  } from '@mui/material';
-  import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined';
-  import PlayCircleOutlineOutlinedIcon from '@mui/icons-material/PlayCircleOutlineOutlined';
-  import AutoStoriesOutlinedIcon from '@mui/icons-material/AutoStoriesOutlined';
-  import StorageOutlinedIcon from '@mui/icons-material/StorageOutlined';
-  import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
-  import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
-  import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
-  import InsightsOutlinedIcon from '@mui/icons-material/InsightsOutlined';
+import type { ElementType } from 'react';
+import {
+  Avatar,
+  Box,
+  Chip,
+  Divider,
+  Drawer,
+  type DrawerProps,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Stack,
+  Toolbar,
+  Typography,
+} from '@mui/material';
+import type { SidebarSectionConfig } from './sidebarConfig';
 
-  const menuItems = [
-    { label: 'Overview', icon: <DashboardOutlinedIcon /> },
-    { label: 'Create Video', icon: <PlayCircleOutlineOutlinedIcon /> },
-    { label: 'Story Builder', icon: <AutoStoriesOutlinedIcon /> },
-    { label: 'Media Library', icon: <StorageOutlinedIcon /> },
-    { label: 'Analytics', icon: <InsightsOutlinedIcon /> },
-  ];
+type SidebarSectionListProps = {
+  title: string;
+  items: { id: string; label: string; icon: ElementType }[];
+  selectedItemId: string;
+  onSelect: (itemId: string) => void;
+  showDivider: boolean;
+};
 
-  const secondaryItems = [
-    { label: 'Upload Assets', icon: <CloudUploadOutlinedIcon /> },
-    { label: 'Settings', icon: <SettingsOutlinedIcon /> },
-    { label: 'Help & Support', icon: <HelpOutlineOutlinedIcon /> },
-  ];
+const SidebarSectionList = ({ title, items, selectedItemId, onSelect, showDivider }: SidebarSectionListProps) => (
+  <>
+    <Typography variant="overline" component="p" sx={{ letterSpacing: 1, opacity: 0.6, mb: 1, fontWeight: 600 }}>
+      {title}
+    </Typography>
+    <List sx={{ width: '100%' }}>
+      {items.map((item) => {
+        const Icon = item.icon;
+        const isSelected = item.id === selectedItemId;
 
-  type SidebarProps = {
-    width: number;
-  } & Pick<DrawerProps, 'variant' | 'open' | 'onClose'>;
+        return (
+          <ListItemButton
+            key={item.id}
+            onClick={() => onSelect(item.id)}
+            sx={{
+              borderRadius: 3,
+              mb: 0.5,
+              color: 'inherit',
+              '&.Mui-selected': {
+                backgroundColor: 'var(--muted-color)',
+                color: 'var(--accent-color)',
+              },
+              '&:hover': {
+                backgroundColor: 'var(--muted-color)',
+              },
+            }}
+            selected={isSelected}
+          >
+            <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
+              <Icon />
+            </ListItemIcon>
+            <ListItemText primary={item.label} primaryTypographyProps={{ fontWeight: 500 }} />
+          </ListItemButton>
+        );
+      })}
+    </List>
+    {showDivider && <Divider sx={{ borderColor: 'var(--muted-color)', my: 2 }} />}
+  </>
+);
 
-  const Sidebar = ({ variant, open, onClose, width }: SidebarProps) => (
+type SidebarProps = {
+  width: number;
+  sections: SidebarSectionConfig[];
+  selectedItemId: string;
+  onSelectItem: (itemId: string) => void;
+} & Pick<DrawerProps, 'variant' | 'open' | 'onClose'>;
+
+const Sidebar = ({ variant, open, onClose, width, sections, selectedItemId, onSelectItem }: SidebarProps) => (
     <Drawer
       variant={variant}
       open={open}
@@ -117,64 +148,16 @@
       </Stack>
 
       <Box sx={{ flex: 1, overflowY: 'auto', px: 1 }}>
-        <Typography
-          variant="overline"
-          component="p"
-          sx={{ letterSpacing: 1, opacity: 0.6, mb: 1, fontWeight: 600 }}
-        >
-          Workspace
-        </Typography>
-        <List sx={{ width: '100%' }}>
-          {menuItems.map((item) => (
-            <ListItemButton
-              key={item.label}
-              sx={{
-                borderRadius: 3,
-                mb: 0.5,
-                color: 'inherit',
-                '&.Mui-selected': {
-                  backgroundColor: 'var(--muted-color)',
-                  color: 'var(--accent-color)',
-                },
-                '&:hover': {
-                  backgroundColor: 'var(--muted-color)',
-                },
-              }}
-              selected={item.label === 'Overview'}
-            >
-              <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.label} primaryTypographyProps={{ fontWeight: 500 }} />
-            </ListItemButton>
-          ))}
-        </List>
-
-        <Divider sx={{ borderColor: 'var(--muted-color)', my: 2 }} />
-
-        <Typography
-          variant="overline"
-          component="p"
-          sx={{ letterSpacing: 1, opacity: 0.6, mb: 1, fontWeight: 600 }}
-        >
-          Utilities
-        </Typography>
-        <List>
-          {secondaryItems.map((item) => (
-            <ListItemButton
-              key={item.label}
-              sx={{
-                borderRadius: 3,
-                mb: 0.5,
-                color: 'inherit',
-                '&:hover': {
-                  backgroundColor: 'var(--muted-color)',
-                },
-              }}
-            >
-              <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.label} primaryTypographyProps={{ fontWeight: 500 }} />
-            </ListItemButton>
-          ))}
-        </List>
+        {sections.map((section, index) => (
+          <SidebarSectionList
+            key={section.title}
+            title={section.title}
+            items={section.items}
+            selectedItemId={selectedItemId}
+            onSelect={onSelectItem}
+            showDivider={index !== sections.length - 1}
+          />
+        ))}
       </Box>
 
       <Box
@@ -202,6 +185,4 @@
     </Drawer>
   );
 
-  export default Sidebar;
-
-
+export default Sidebar;

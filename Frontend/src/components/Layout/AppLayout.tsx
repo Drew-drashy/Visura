@@ -4,6 +4,7 @@ import { useTheme } from '@mui/material/styles';
 import Navbar from '../Navbar/Navbar';
 import Sidebar from '../Sidebar/Sidebar';
 import DashboardContent from '../Dashboard/DashboardContent';
+import { sidebarSections } from '../Sidebar/sidebarConfig';
 
 const SIDEBAR_WIDTH = 288;
 
@@ -11,6 +12,7 @@ const AppLayout = () => {
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [selectedItemId, setSelectedItemId] = useState(sidebarSections[0].items[0].id);
 
   const handleToggleSidebar = () => {
     setMobileOpen((prev) => !prev);
@@ -19,6 +21,23 @@ const AppLayout = () => {
   const handleCloseSidebar = () => {
     setMobileOpen(false);
   };
+
+  const handleSelectSidebarItem = (itemId: string) => {
+    setSelectedItemId(itemId);
+    if (!isDesktop) {
+      setMobileOpen(false);
+    }
+  };
+
+  const SelectedComponent = (() => {
+    for (const section of sidebarSections) {
+      const found = section.items.find((item) => item.id === selectedItemId);
+      if (found) {
+        return found.component;
+      }
+    }
+    return null;
+  })();
 
   return (
     <Box
@@ -35,6 +54,9 @@ const AppLayout = () => {
         open={isDesktop ? true : mobileOpen}
         onClose={handleCloseSidebar}
         width={SIDEBAR_WIDTH}
+        sections={sidebarSections}
+        selectedItemId={selectedItemId}
+        onSelectItem={handleSelectSidebarItem}
       />
       <Box
         component="main"
@@ -49,7 +71,7 @@ const AppLayout = () => {
         }}
       >
         <Toolbar sx={{ display: { xs: 'block', md: 'none' } }} />
-        <DashboardContent />
+        {SelectedComponent ? <SelectedComponent /> : <DashboardContent />}
       </Box>
     </Box>
   );
