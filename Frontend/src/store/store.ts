@@ -9,7 +9,7 @@ export const store = configureStore({
     auth: authReducer,
   },
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(authApi.middleware),
-  devTools: import.meta.env.DEV,
+//   devTools: import.meta.env.DEV,
 });
 
 setupListeners(store.dispatch);

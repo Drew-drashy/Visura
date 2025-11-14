@@ -16,6 +16,11 @@ export type AuthState = {
   tokens: AuthTokens | null;
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
+  loginForm: {
+    email: string,
+    password: string
+    rememberMe: boolean,
+  }
 };
 
 export type LoginRequest = {

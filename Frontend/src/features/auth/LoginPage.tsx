@@ -17,9 +17,19 @@ import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import GoogleIcon from '@mui/icons-material/Google';
 import { Link as RouterLink } from 'react-router-dom';
+import { setemail, setpassword, setrememberMe } from './slice/authSlice';
+import { useLoginMutation } from './api/authApi';
+import { useDispatch } from 'react-redux';
 
-const LoginPage = () => {
+export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+
+  
+
+  const handleLogin = () => {
+
+  
+  };
 
   return (
     <Box
@@ -78,6 +88,7 @@ const LoginPage = () => {
               label="Email address"
               type="email"
               placeholder="you@company.com"
+              onChange={(e) => dispatch(setemail(e.target.value))}
               fullWidth
               variant="outlined"
             />
@@ -85,6 +96,7 @@ const LoginPage = () => {
               label="Password"
               type={showPassword ? 'text' : 'password'}
               placeholder="••••••••"
+              onChange={(e) => dispatch(setpassword(e.target.value))}
               fullWidth
               variant="outlined"
               InputProps={{
@@ -98,7 +110,7 @@ const LoginPage = () => {
               }}
             />
             <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" spacing={1.5}>
-              <FormControlLabel control={<Checkbox size="small" />} label="Remember me" />
+              <FormControlLabel control={<Checkbox size="small" />} label="Remember me" onChange={(e) => dispatch(setrememberMe(e.target.checked))} />
               <Link component={RouterLink} to="/forgot-password" underline="hover" fontWeight={600}>
                 Forgot password?
               </Link>
@@ -107,7 +119,9 @@ const LoginPage = () => {
               variant="contained"
               size="large"
               fullWidth
+              loading={isLoading}
               sx={{ py: 1.3, borderRadius: 999, textTransform: 'none', fontWeight: 700 }}
+              onClick={handleLogin}
             >
               Sign in
             </Button>
@@ -125,5 +139,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
 

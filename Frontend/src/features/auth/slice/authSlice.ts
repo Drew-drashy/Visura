@@ -7,6 +7,11 @@ const initialState: AuthState = {
   tokens: null,
   status: 'idle',
   error: null,
+  loginForm: {
+    email: "",
+    password: "",
+    rememberMe: false,
+  }
 };
 
 const authSlice = createSlice({
@@ -23,6 +28,15 @@ const authSlice = createSlice({
     setAuthError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
     },
+   setemail: (state, action: PayloadAction<string>) => {
+    state.loginForm.email = action.payload;
+   },
+   setpassword: (state, action: PayloadAction<string>) => {
+    state.loginForm.password = action.payload;
+   },
+   setrememberMe: (state, action: PayloadAction<boolean>) => {
+    state.loginForm.rememberMe = action.payload;
+   },
   },
   extraReducers: (builder) => {
     builder
@@ -66,7 +80,7 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, setCredentials, setAuthError } = authSlice.actions;
+export const { logout, setCredentials, setAuthError, setemail, setpassword, setrememberMe } = authSlice.actions;
 
 export default authSlice.reducer;
 
