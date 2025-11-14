@@ -19,17 +19,22 @@ import GoogleIcon from '@mui/icons-material/Google';
 import { Link as RouterLink } from 'react-router-dom';
 import { setemail, setpassword, setrememberMe } from './slice/authSlice';
 import { useLoginMutation } from './api/authApi';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const dispatch=useDispatch();
+      const loginForm = useSelector((state) => state.auth.loginForm);
+
+  
+
 
   
 
   const handleLogin = () => {
-
-  
-  };
+    console.log(loginForm);
+    
+  }
 
   return (
     <Box
@@ -119,7 +124,8 @@ export default function LoginPage() {
               variant="contained"
               size="large"
               fullWidth
-              loading={isLoading}
+              loading={false}
+              disabled={false}
               sx={{ py: 1.3, borderRadius: 999, textTransform: 'none', fontWeight: 700 }}
               onClick={handleLogin}
             >
