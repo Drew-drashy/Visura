@@ -1,4 +1,3 @@
-# main.py (only the new parts shown; keep your existing imports)
 import os, tempfile
 from pathlib import Path
 from typing import Optional, List
@@ -35,7 +34,7 @@ def generate_video_veo(req: VeoRequest):
         set_status(job_id, "processing", {"step": "veo:start"})
         aspect = req.aspectRatio or os.getenv("VEO_ASPECT_RATIO")
         res = req.resolution or os.getenv("VEO_RESOLUTION")
-        dur = req.durationSeconds or (int(os.getenv("VEO_DURATION_SECONDS", "8")))
+        dur = req.durationSeconds or int(os.getenv("VEO_DURATION_SECONDS", "8"))
 
         local_path = generate_video_with_veo(
             prompt=req.prompt,
@@ -48,13 +47,17 @@ def generate_video_veo(req: VeoRequest):
         set_status(job_id, "processing", {"step": "upload"})
         video_url, storage_key = upload_video(local_path)
 
-        payload = {"status":"completed","video_url":video_url,"storage_key":storage_key}
+        payload = {"status": "completed", "video_url": video_url, "storage_key": storage_key}
         set_status(job_id, "completed", payload)
         notify_webhook(job_id, payload)
 
         return GenerateResponse(jobId=job_id, status="completed", video_url=video_url, storage_key=storage_key)
+
     except Exception as e:
-        err = {"status":"failed","error":str(e)}
+        import traceback
+        print("!!! ERROR in generate_video_veo:", e)
+        traceback.print_exc()
+        err = {"status": "failed", "error": str(e)}
         set_status(job_id, "failed", err)
         notify_webhook(job_id, err)
         return GenerateResponse(jobId=job_id, status="failed", message=str(e))

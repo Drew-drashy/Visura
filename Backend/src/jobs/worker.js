@@ -2,44 +2,47 @@ import "dotenv/config.js";
 import axios from "axios";
 import { videoQueue } from "./queue.js";
 import Video from "../models/Video.js";
+import { connectMongo } from "../config/mongo.js";
 
-const AI_URL = process.env.AI_SERVICE_URL || "http://localhost:8000";
-
-// optional: control how many parallel jobs you want
+const AI_URL = process.env.AI_SERVICE_URL|| 'http://0.0.0.0:800' || "http://localhost:8000";
 const CONCURRENCY = Number(process.env.VIDEO_WORKER_CONCURRENCY || 2);
 
-console.log("Video worker starting…");
+(async () => {
+  await connectMongo();
+  console.log("Video worker starting…");
 
-videoQueue.process("generate-video", CONCURRENCY, async (job) => {
-  const { jobId, prompt } = job.data;
-  console.log(`Processing job ${jobId} with prompt:`, prompt);
+  videoQueue.process("generate-video", CONCURRENCY, async (job) => {
+    const { jobId, prompt } = job.data;
+    console.log(`Processing job ${jobId} with prompt:`, prompt);
 
-  try {
-    // mark as processing
-    await Video.findByIdAndUpdate(jobId, { status: "processing" });
+    try {
+      await Video.findByIdAndUpdate(jobId, { status: "processing" });
+      console.log('backend to ai calling')
+      await axios.post(`${AI_URL}/generate_video_veo`, {
+        jobId,
+        prompt,
+      });
 
-    // call Python AI service (it will upload to Cloudinary and hit your webhook)
-    await axios.post(`${AI_URL}/generate_video_veo`, {
-      jobId,
-      prompt
-    });
+      return { ok: true };
+    } catch (err) {
+      console.error(
+        "Worker error for job",
+        jobId,
+        err?.response?.data || err.message
+      );
+      await Video.findByIdAndUpdate(jobId, {
+        status: "failed",
+        error: err.message,
+      });
+      throw err; 
+    }
+  });
 
-    // Do NOT mark completed here — webhook will do that once video_url is ready
-    return { ok: true };
-  } catch (err) {
-    console.error("Worker error for job", jobId, err?.response?.data || err.message);
-    await Video.findByIdAndUpdate(jobId, {
-      status: "failed",
-      error: err.message
-    });
-    throw err; // let Bull handle retries / failed status
-  }
-});
+  videoQueue.on("completed", (job) => {
+    console.log(`Job ${job.id} completed (AI request sent).`);
+  });
 
-videoQueue.on("completed", (job) => {
-  console.log(`Job ${job.id} completed (AI service request sent).`);
-});
-
-videoQueue.on("failed", (job, err) => {
-  console.error(`Job ${job.id} failed:`, err.message);
-});
+  videoQueue.on("failed", (job, err) => {
+    console.error(`Job ${job.id} failed:`, err.message);
+  });
+})();

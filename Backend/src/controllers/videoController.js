@@ -4,7 +4,7 @@ import { videoQueue } from "../jobs/queue.js";
 export const generateVideo = async (req, res) => {
   try {
     const { prompt } = req.body;
-    const userId = req.user._id;
+    const userId = req.user.id;
 
     // 1) Create DB record
     const job = await Video.create({ userId, prompt, status: "queued" });
@@ -25,18 +25,59 @@ export const generateVideo = async (req, res) => {
 };
 export const videoWebhook = async (req, res) => {
   try {
+    console.log('hiiiii im webhookkkkk')
     const { jobId, status, video_url, storage_key, message } = req.body;
-
     const update = { status };
     if (video_url) update.videoUrl = video_url;
     if (storage_key) update.storageKey = storage_key;
     if (message && status === "failed") update.error = message;
 
     await Video.findByIdAndUpdate(jobId, update);
-    return res.json({ ok: true });
+    return res.status(200).json({message: 'Video has been '});
   } catch (err) {
     console.error("webhook error:", err);
     return res.status(500).json({ error: "Failed to update video job" });
   }
 };
 
+export const getVideo = async (req, res) => {
+  try {
+    const videoJobId = req.params.id;
+    if (!videoJobId) {
+      return res.status(400).json({ message: "Video ID is required." });
+    }
+    const job = await Video.findById(videoJobId);
+
+    if (!job) {
+      return res.status(404).json({ message: "Video job not found." });
+    }
+    return res.status(200).json(job);
+  } catch (err) {
+    console.error("videoById error:", err);
+    return res
+      .status(500)
+      .json({ message: "Server error fetching video job.", error: err.message });
+  }
+};
+
+export const listMyVideos = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    if (!userId) {
+      return res.status(401).json({ message: "User not authenticated." });
+    }
+    const videos = await Video.find({ userId })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return res.status(200).json({
+      count: videos.length,
+      videos
+    });
+  } catch (err) {
+    console.error("listMyVideos error:", err);
+    return res
+      .status(500)
+      .json({ message: "Failed to fetch user videos", error: err.message });
+  }
+};
