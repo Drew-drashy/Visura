@@ -4,7 +4,7 @@ import { videoQueue } from "./queue.js";
 import Video from "../models/Video.js";
 import { connectMongo } from "../config/mongo.js";
 
-const AI_URL = process.env.AI_SERVICE_URL || "http://localhost:8000";
+const AI_URL = process.env.AI_SERVICE_URL|| 'http://0.0.0.0:800' || "http://localhost:8000";
 const CONCURRENCY = Number(process.env.VIDEO_WORKER_CONCURRENCY || 2);
 
 (async () => {
@@ -17,7 +17,7 @@ const CONCURRENCY = Number(process.env.VIDEO_WORKER_CONCURRENCY || 2);
 
     try {
       await Video.findByIdAndUpdate(jobId, { status: "processing" });
-
+      console.log('backend to ai calling')
       await axios.post(`${AI_URL}/generate_video_veo`, {
         jobId,
         prompt,

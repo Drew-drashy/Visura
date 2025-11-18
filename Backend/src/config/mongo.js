@@ -19,7 +19,6 @@ export async function connectMongo() {
   try {
     await mongoose.connect(MONGO_URI, {
       useNewUrlParser: true,
-      useUnifiedTopology: true,
     });
     isConnected = true;
     console.log("MongoDB connected (worker/server)");

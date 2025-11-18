@@ -25,8 +25,8 @@ export const generateVideo = async (req, res) => {
 };
 export const videoWebhook = async (req, res) => {
   try {
+    console.log('hiiiii im webhookkkkk')
     const { jobId, status, video_url, storage_key, message } = req.body;
-
     const update = { status };
     if (video_url) update.videoUrl = video_url;
     if (storage_key) update.storageKey = storage_key;
