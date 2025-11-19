@@ -1,11 +1,19 @@
 import Video from "../models/Video.js";
 import { videoQueue } from "../jobs/queue.js";
+import User from "../models/User.js";
 
 export const generateVideo = async (req, res) => {
   try {
     const { prompt } = req.body;
     const userId = req.user.id;
-
+    const userDoc=await  User.findById(userId).select('credits');
+    if(!userDoc){
+      return res.status(400).json({message: 'User not found'});
+    }
+    const credit=userDoc?.credits;
+    if(credit<=0){
+      return res.status(403).json({message: 'No Credits Left'});
+    }
     // 1) Create DB record
     const job = await Video.create({ userId, prompt, status: "queued" });
 
@@ -33,6 +41,8 @@ export const videoWebhook = async (req, res) => {
     if (message && status === "failed") update.error = message;
 
     await Video.findByIdAndUpdate(jobId, update);
+    const userId=Video?.userId;
+    await User.findByIdAndUpdate(userId,{$inc: {credits:-1}});
     return res.status(200).json({message: 'Video has been '});
   } catch (err) {
     console.error("webhook error:", err);

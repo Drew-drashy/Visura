@@ -6,8 +6,14 @@ import videoRoutes from "./src/routes/videoRoutes.js";
 import authRoutes from './src/routes/authRoutes.js';
 dotenv.config();
 const app = express();
-
-app.use(cors());
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      callback(null, true); // allow all
+    },
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 await connectMongo();
