@@ -37,8 +37,20 @@ export default function LoginPage() {
           rememberMe: false
         }
       });
-      const onSubmit = (data : any ) => {
-        login(data);
+       const onSubmit = async (data : any ) => {
+         try {
+    const res = await login(data).unwrap(); 
+    console.log("Logged in:", res);
+     enqueueSnackbar("Logged in successfully!", {
+      variant: "success",
+    });
+  } catch (err: any) {
+    console.log("Login failed:", err);
+       enqueueSnackbar(err?.data?.error || "Login failed", {
+      variant: "error",
+    });
+
+  }
       }
   return (
     <Box

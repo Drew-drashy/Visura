@@ -36,6 +36,6 @@ export type SignupRequest = {
 
 export type AuthResponse = {
   user: AuthUser;
-  tokens: AuthTokens;
+  accessToken: AuthTokens;
 };
 

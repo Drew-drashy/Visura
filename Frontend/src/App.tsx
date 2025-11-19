@@ -5,6 +5,7 @@ import LoginPage from './features/auth/LoginPage';
 import SignupPage from './features/auth/SignupPage';
 
 const App = () => (
+  
   <Routes>
     <Route path="/" element={<AppLayout />} />
     <Route path="/login" element={<LoginPage />} />

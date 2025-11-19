@@ -18,9 +18,55 @@ import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import GoogleIcon from '@mui/icons-material/Google';
 import { Link as RouterLink } from 'react-router-dom';
 
+import { useForm } from 'react-hook-form';
+import { useSignupMutation } from './api/authApi';
+import { useSnackbar } from 'notistack';
+
 const SignupPage = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const { enqueueSnackbar } = useSnackbar();
+  const [signup, { isLoading }] = useSignupMutation();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      agree: false,
+    },
+  });
+
+  const onSubmit = async (data: any) => {
+    try {
+      const payload = {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        password: data.password,
+      };
+
+      await signup(payload).unwrap();
+
+      enqueueSnackbar("Account created successfully!", {
+        variant: "success",
+      });
+
+      // redirect if needed
+      // navigate("/login");
+
+    } catch (err: any) {
+      enqueueSnackbar(err?.data?.message || "Signup failed", {
+        variant: "error",
+      });
+      console.error("Signup error:", err);
+    }
+  };
 
   return (
     <Box
@@ -28,11 +74,11 @@ const SignupPage = () => {
         minHeight: '100vh',
         display: 'grid',
         placeItems: 'center',
-         background: `
-  radial-gradient(600px at 20% 20%, var(--purple-blob), transparent 70%),
-  radial-gradient(800px at 80% 70%, var(--purple-blob-strong), transparent 75%),
-  linear-gradient(135deg, var(--hero-bg-start), var(--hero-bg-end))
-`,
+        background: `
+          radial-gradient(600px at 20% 20%, var(--purple-blob), transparent 70%),
+          radial-gradient(800px at 80% 70%, var(--purple-blob-strong), transparent 75%),
+          linear-gradient(135deg, var(--hero-bg-start), var(--hero-bg-end))
+        `,
         color: 'var(--primary-text-color)',
         px: 2.5,
         py: { xs: 8, sm: 12 },
@@ -78,57 +124,93 @@ const SignupPage = () => {
 
           <Divider sx={{ opacity: 0.6 }}>or</Divider>
 
-          <Stack component="form" spacing={2.5}>
+          <Stack component="form" spacing={2.5} onSubmit={handleSubmit(onSubmit)}>
+
+            {/* NAME ROW */}
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-              <TextField label="First name" fullWidth placeholder="Ayan" variant="outlined" />
-              <TextField label="Last name" fullWidth placeholder="Sharma" variant="outlined" />
+              <TextField
+                label="First name"
+                fullWidth
+                {...register("firstName", { required: "First name is required" })}
+                error={!!errors.firstName}
+                helperText={errors.firstName?.message}
+              />
+
+              <TextField
+                label="Last name"
+                fullWidth
+                {...register("lastName", { required: "Last name is required" })}
+                error={!!errors.lastName}
+                helperText={errors.lastName?.message}
+              />
             </Stack>
+
+            {/* EMAIL */}
             <TextField
               label="Work email"
               type="email"
               placeholder="you@studio.com"
               fullWidth
-              variant="outlined"
+              {...register("email", { required: "Email is required" })}
+              error={!!errors.email}
+              helperText={errors.email?.message}
             />
+
+            {/* PASSWORD */}
             <TextField
               label="Password"
               type={showPassword ? 'text' : 'password'}
               placeholder="Create a strong password"
               fullWidth
-              variant="outlined"
+              {...register("password", {
+                required: "Password is required",
+                minLength: { value: 6, message: "Min 6 characters" }
+              })}
+              error={!!errors.password}
+              helperText={errors.password?.message}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton onClick={() => setShowPassword((prev) => !prev)} edge="end">
+                    <IconButton onClick={() => setShowPassword((p) => !p)} edge="end">
                       {showPassword ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
                     </IconButton>
                   </InputAdornment>
                 ),
               }}
             />
+
+            {/* TERMS CHECKBOX */}
             <FormControlLabel
-              control={<Checkbox size="small" />}
+              control={<Checkbox size="small" {...register("agree", { required: true })} />}
               label={
                 <Typography variant="body2">
                   I agree to the
                   <Link component={RouterLink} to="/terms" underline="hover" fontWeight={600} sx={{ ml: 0.5 }}>
                     Terms of Service
-                  </Link>
-                  {' '}and
+                  </Link>{' '}
+                  and
                   <Link component={RouterLink} to="/privacy" underline="hover" fontWeight={600} sx={{ ml: 0.5 }}>
                     Privacy Policy
-                  </Link>
-                  .
+                  </Link>.
                 </Typography>
               }
             />
+            {errors.agree && (
+              <Typography variant="caption" color="error">
+                You must accept the agreement
+              </Typography>
+            )}
+
+            {/* SUBMIT BUTTON */}
             <Button
+              type="submit"
               variant="contained"
               size="large"
               fullWidth
+              disabled={isLoading}
               sx={{ py: 1.3, borderRadius: 999, textTransform: 'none', fontWeight: 700 }}
             >
-              Create account
+              {isLoading ? "Creating..." : "Create account"}
             </Button>
           </Stack>
 
@@ -145,4 +227,3 @@ const SignupPage = () => {
 };
 
 export default SignupPage;
-
