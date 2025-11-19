@@ -80,6 +80,11 @@ const themeCssVariables: Record<PaletteMode, Record<string, string>> = {
     '--navbar-bg': '#ffffffcc',
     '--shadow-color': 'rgba(15, 23, 42, 0.08)',
     '--card-bg': '#ffffff',
+    '--hero-bg-start': '#f7f4ff',
+'--hero-bg-end': '#ece9ff',
+
+'--purple-blob': 'rgba(103, 80, 164, 0.18)',          // soft glow
+'--purple-blob-strong': 'rgba(103, 80, 164, 0.32)',   // deeper glow
   },
   dark: {
     '--bg-color': '#0f172a',
@@ -94,6 +99,12 @@ const themeCssVariables: Record<PaletteMode, Record<string, string>> = {
     '--navbar-bg': 'rgba(15, 23, 42, 0.85)',
     '--shadow-color': 'rgba(15, 23, 42, 0.6)',
     '--card-bg': '#1f2937',
+    '--hero-bg-start': '#140f26',
+'--hero-bg-end': '#09061a',
+
+'--purple-blob': 'rgba(157, 140, 255, 0.18)',
+'--purple-blob-strong': 'rgba(157, 140, 255, 0.35)',
+
   },
 };
 

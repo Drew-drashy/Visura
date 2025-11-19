@@ -28,7 +28,11 @@ const SignupPage = () => {
         minHeight: '100vh',
         display: 'grid',
         placeItems: 'center',
-        background: 'var(--bg-color)',
+         background: `
+  radial-gradient(600px at 20% 20%, var(--purple-blob), transparent 70%),
+  radial-gradient(800px at 80% 70%, var(--purple-blob-strong), transparent 75%),
+  linear-gradient(135deg, var(--hero-bg-start), var(--hero-bg-end))
+`,
         color: 'var(--primary-text-color)',
         px: 2.5,
         py: { xs: 8, sm: 12 },
@@ -97,22 +101,6 @@ const SignupPage = () => {
                   <InputAdornment position="end">
                     <IconButton onClick={() => setShowPassword((prev) => !prev)} edge="end">
                       {showPassword ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <TextField
-              label="Confirm password"
-              type={showConfirmPassword ? 'text' : 'password'}
-              placeholder="Re-enter your password"
-              fullWidth
-              variant="outlined"
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton onClick={() => setShowConfirmPassword((prev) => !prev)} edge="end">
-                      {showConfirmPassword ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
                     </IconButton>
                   </InputAdornment>
                 ),

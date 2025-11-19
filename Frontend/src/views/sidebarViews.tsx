@@ -1,4 +1,6 @@
+import CreateVideo from '../components/CreateVideo/CreateVideo';
 import DashboardContent from '../components/Dashboard/DashboardContent';
+import MediaLibrary from '../components/MediaLibrary/MediaLibrary';
 import SectionPlaceholder from './SectionPlaceholder';
 
 export const OverviewView = () => (
@@ -8,11 +10,8 @@ export const OverviewView = () => (
 );
 
 export const CreateVideoView = () => (
-  <SectionPlaceholder
-    title="Create Video"
-    description="Start a fresh video project, assemble story beats, and orchestrate your production workflow."
-  />
-);
+  <CreateVideo/>
+ );
 
 export const StoryBuilderView = () => (
   <SectionPlaceholder
@@ -22,10 +21,7 @@ export const StoryBuilderView = () => (
 );
 
 export const MediaLibraryView = () => (
-  <SectionPlaceholder
-    title="Media Library"
-    description="Browse, organize, and tag every asset from raw footage to finished renders."
-  />
+   <MediaLibrary/>
 );
 
 export const AnalyticsView = () => (

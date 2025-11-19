@@ -70,7 +70,7 @@ const Navbar = ({ onMenuClick, sidebarWidth }: NavbarProps) => {
             variant="contained"
             color="primary"
             component={RouterLink}
-            to="/signup"
+            to="/login"
             sx={{
               fontWeight: 600,
               borderRadius: 999,
@@ -79,7 +79,7 @@ const Navbar = ({ onMenuClick, sidebarWidth }: NavbarProps) => {
               boxShadow: 'none',
             }}
           >
-            Sign Up
+            Sign in
           </Button>
         </Stack>
       </Toolbar>

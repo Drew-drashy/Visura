@@ -35,3 +35,6 @@ a {
 a:hover {
   opacity: 0.85;
 }
+.notistack-MuiContent-success {
+  background-color: #6750A4 !important;
+}

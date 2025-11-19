@@ -13,36 +13,44 @@ import {
   Button,
   Divider,
 } from '@mui/material';
+
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import GoogleIcon from '@mui/icons-material/Google';
 import { Link as RouterLink } from 'react-router-dom';
-import { setemail, setpassword, setrememberMe } from './slice/authSlice';
 import { useLoginMutation } from './api/authApi';
-import { useDispatch, useSelector } from 'react-redux';
+import { useForm } from 'react-hook-form';
+import { useSnackbar } from 'notistack';
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const dispatch=useDispatch();
-      const loginForm = useSelector((state) => state.auth.loginForm);
-
-  
-
-
-  
-
-  const handleLogin = () => {
-    console.log(loginForm);
-    
-  }
-
+   const { enqueueSnackbar } = useSnackbar();
+      const [login, { isLoading }] = useLoginMutation();
+      const {
+        register,
+        handleSubmit,
+        formState: { errors }
+      } = useForm({
+        defaultValues: {
+          email: "",
+          password: "",
+          rememberMe: false
+        }
+      });
+      const onSubmit = (data : any ) => {
+        login(data);
+      }
   return (
     <Box
       sx={{
         minHeight: '100vh',
         display: 'grid',
         placeItems: 'center',
-        background: 'var(--bg-color)',
+       background: `
+  radial-gradient(600px at 20% 20%, var(--purple-blob), transparent 70%),
+  radial-gradient(800px at 80% 70%, var(--purple-blob-strong), transparent 75%),
+  linear-gradient(135deg, var(--hero-bg-start), var(--hero-bg-end))
+`,
         color: 'var(--primary-text-color)',
         px: 2.5,
         py: { xs: 8, sm: 12 },
@@ -93,7 +101,7 @@ export default function LoginPage() {
               label="Email address"
               type="email"
               placeholder="you@company.com"
-              onChange={(e) => dispatch(setemail(e.target.value))}
+              {...register("email", { required: "First name is required" })}
               fullWidth
               variant="outlined"
             />
@@ -101,9 +109,9 @@ export default function LoginPage() {
               label="Password"
               type={showPassword ? 'text' : 'password'}
               placeholder="••••••••"
-              onChange={(e) => dispatch(setpassword(e.target.value))}
               fullWidth
               variant="outlined"
+              {...register("password", { required: "password is required" })}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
@@ -115,7 +123,7 @@ export default function LoginPage() {
               }}
             />
             <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" spacing={1.5}>
-              <FormControlLabel control={<Checkbox size="small" />} label="Remember me" onChange={(e) => dispatch(setrememberMe(e.target.checked))} />
+              <FormControlLabel control={<Checkbox size="small" />} label="Remember me"  />
               <Link component={RouterLink} to="/forgot-password" underline="hover" fontWeight={600}>
                 Forgot password?
               </Link>
@@ -123,11 +131,13 @@ export default function LoginPage() {
             <Button
               variant="contained"
               size="large"
+              type='submit'
               fullWidth
-              loading={false}
-              disabled={false}
+              loading={isLoading}
+              disabled={isLoading}
               sx={{ py: 1.3, borderRadius: 999, textTransform: 'none', fontWeight: 700 }}
-              onClick={handleLogin}
+              onClick={handleSubmit(onSubmit)}
+             
             >
               Sign in
             </Button>

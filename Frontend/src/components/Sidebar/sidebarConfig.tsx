@@ -44,7 +44,6 @@ export const sidebarSections: SidebarSectionConfig[] = [
   {
     title: 'Utilities',
     items: [
-      { id: 'upload-assets', label: 'Upload Assets', icon: CloudUploadOutlinedIcon, component: UploadAssetsView },
       { id: 'settings', label: 'Settings', icon: SettingsOutlinedIcon, component: SettingsView },
       { id: 'help-support', label: 'Help & Support', icon: HelpOutlineOutlinedIcon, component: HelpSupportView },
     ],
