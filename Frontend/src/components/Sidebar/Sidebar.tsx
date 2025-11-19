@@ -25,7 +25,7 @@ type SidebarSectionListProps = {
 };
 
 const SidebarSectionList = ({ title, items, selectedItemId, onSelect, showDivider }: SidebarSectionListProps) => (
-  <>
+   <>
     <Typography variant="overline" component="p" sx={{ letterSpacing: 1, opacity: 0.6, mb: 1, fontWeight: 600 }}>
       {title}
     </Typography>
@@ -37,7 +37,7 @@ const SidebarSectionList = ({ title, items, selectedItemId, onSelect, showDivide
         return (
           <ListItemButton
             key={item.id}
-            onClick={() => onSelect(item.id)}
+            onClick={() => onSelect(item)}
             sx={{
               borderRadius: 3,
               mb: 0.5,

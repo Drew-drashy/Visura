@@ -4,7 +4,8 @@ import { useTheme } from '@mui/material/styles';
 import Navbar from '../Navbar/Navbar';
 import Sidebar from '../Sidebar/Sidebar';
 import DashboardContent from '../Dashboard/DashboardContent';
-import { sidebarSections } from '../Sidebar/sidebarConfig';
+import { sidebarSections, type SidebarItemConfig } from '../Sidebar/sidebarConfig';
+import { useNavigate } from 'react-router-dom';
 
 const SIDEBAR_WIDTH = 288;
 
@@ -13,6 +14,7 @@ const AppLayout = () => {
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
   const [mobileOpen, setMobileOpen] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState(sidebarSections[0].items[0].id);
+  const navigate = useNavigate();
 
   const handleToggleSidebar = () => {
     setMobileOpen((prev) => !prev);
@@ -22,12 +24,15 @@ const AppLayout = () => {
     setMobileOpen(false);
   };
 
-  const handleSelectSidebarItem = (itemId: string) => {
-    setSelectedItemId(itemId);
-    if (!isDesktop) {
-      setMobileOpen(false);
-    }
-  };
+  const handleSelectSidebarItem = (item: SidebarItemConfig) => {
+  setSelectedItemId(item.id);      // highlight active item
+  navigate(item.path);             // navigate to page
+
+  if (!isDesktop) {
+    setMobileOpen(false);          // close sidebar on mobile
+  }
+};
+
 
   const SelectedComponent = (() => {
     for (const section of sidebarSections) {

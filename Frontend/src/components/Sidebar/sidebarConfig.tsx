@@ -4,7 +4,7 @@ import PlayCircleOutlineOutlinedIcon from '@mui/icons-material/PlayCircleOutline
 import AutoStoriesOutlinedIcon from '@mui/icons-material/AutoStoriesOutlined';
 import StorageOutlinedIcon from '@mui/icons-material/StorageOutlined';
 import InsightsOutlinedIcon from '@mui/icons-material/InsightsOutlined';
-import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
+
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 import {
@@ -15,7 +15,6 @@ import {
   OverviewView,
   SettingsView,
   StoryBuilderView,
-  UploadAssetsView,
 } from '../../views/sidebarViews';
 
 export type SidebarItemConfig = {
@@ -23,30 +22,31 @@ export type SidebarItemConfig = {
   label: string;
   icon: ElementType;
   component: ComponentType;
+  path:string;
 };
 
 export type SidebarSectionConfig = {
   title: string;
   items: SidebarItemConfig[];
 };
-
 export const sidebarSections: SidebarSectionConfig[] = [
   {
     title: 'Workspace',
     items: [
-      { id: 'overview', label: 'Overview', icon: DashboardOutlinedIcon, component: OverviewView },
-      { id: 'create-video', label: 'Create Video', icon: PlayCircleOutlineOutlinedIcon, component: CreateVideoView },
-      { id: 'story-builder', label: 'Story Builder', icon: AutoStoriesOutlinedIcon, component: StoryBuilderView },
-      { id: 'media-library', label: 'Media Library', icon: StorageOutlinedIcon, component: MediaLibraryView },
-      { id: 'analytics', label: 'Analytics', icon: InsightsOutlinedIcon, component: AnalyticsView },
+      { id: 'overview', label: 'Overview', icon: DashboardOutlinedIcon, component: OverviewView, path: '/' },
+      { id: 'create-video', label: 'Create Video', icon: PlayCircleOutlineOutlinedIcon, component: CreateVideoView, path: '/create-video' },
+      { id: 'story-builder', label: 'Story Builder', icon: AutoStoriesOutlinedIcon, component: StoryBuilderView, path: '/story-builder' },
+      { id: 'media-library', label: 'Media Library', icon: StorageOutlinedIcon, component: MediaLibraryView, path: '/media-library' },
+      { id: 'analytics', label: 'Analytics', icon: InsightsOutlinedIcon, component: AnalyticsView, path: '/analytics' },
     ],
   },
   {
     title: 'Utilities',
     items: [
-      { id: 'settings', label: 'Settings', icon: SettingsOutlinedIcon, component: SettingsView },
-      { id: 'help-support', label: 'Help & Support', icon: HelpOutlineOutlinedIcon, component: HelpSupportView },
+      { id: 'settings', label: 'Settings', icon: SettingsOutlinedIcon, component: SettingsView, path: '/settings' },
+      { id: 'help-support', label: 'Help & Support', icon: HelpOutlineOutlinedIcon, component: HelpSupportView, path: '/help-support' },
     ],
   },
 ];
+
 
