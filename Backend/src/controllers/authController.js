@@ -157,7 +157,7 @@ export async function logout(req, res, next) {
     if (!refreshToken) return res.status(400).json({ error: 'refreshToken required' });
 
     await Session.deleteMany({ refreshToken });
-    res.json({ ok: true });
+    res.status(200).json({message: "Log out Successfully"});
   } catch (e) { respondWithError(res, e, 'Failed to logout'); }
 }
 
