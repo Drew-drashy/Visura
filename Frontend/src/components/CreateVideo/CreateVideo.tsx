@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   Box,
   Stack,
@@ -9,6 +9,8 @@ import {
   CardContent,
   LinearProgress,
   Chip,
+  IconButton,
+  InputAdornment,
 } from "@mui/material";
 import MovieCreationOutlinedIcon from "@mui/icons-material/MovieCreationOutlined";
 import BoltOutlinedIcon from "@mui/icons-material/BoltOutlined";
@@ -17,6 +19,18 @@ import { authApiUtils } from "../../features/auth/api/authApi";
 import { selectAuthState } from "../../features/auth/selectors";
 import { VIDEO_GENERATE_URL } from "../../constants/url";
 import { useSnackbar } from "notistack";
+import MicNoneOutlinedIcon from "@mui/icons-material/MicNoneOutlined";
+import StopCircleOutlinedIcon from "@mui/icons-material/StopCircleOutlined";
+
+type SpeechRecognitionConstructor = new () => SpeechRecognition;
+
+const SpeechRecognition =
+  typeof window !== "undefined"
+    ? ((window as unknown as { SpeechRecognition?: SpeechRecognitionConstructor; webkitSpeechRecognition?: SpeechRecognitionConstructor })
+        .SpeechRecognition ||
+      (window as unknown as { SpeechRecognition?: SpeechRecognitionConstructor; webkitSpeechRecognition?: SpeechRecognitionConstructor })
+        .webkitSpeechRecognition)
+    : null;
 
 export default function CreateVideo() {
   const dispatch = useAppDispatch();
@@ -25,6 +39,9 @@ export default function CreateVideo() {
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [isListening, setIsListening] = useState(false);
+  const [recognizer, setRecognizer] = useState<SpeechRecognition | null>(null);
+  const lastTranscriptRef = useRef<string>("");
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
@@ -65,6 +82,47 @@ export default function CreateVideo() {
     }
   };
 
+  const startDictation = () => {
+    if (!SpeechRecognition) {
+      enqueueSnackbar("Speech recognition is not supported in this browser.", { variant: "warning" });
+      return;
+    }
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.lang = "en-US";
+      recognition.interimResults = false;
+
+      recognition.onstart = () => setIsListening(true);
+      recognition.onend = () => setIsListening(false);
+      recognition.onerror = () => {
+        setIsListening(false);
+        enqueueSnackbar("Could not capture audio. Please try again.", { variant: "error" });
+      };
+      recognition.onresult = (event) => {
+        const result = event.results[event.resultIndex];
+        const transcript = result?.[0]?.transcript?.trim?.();
+        if (!transcript) return;
+        if (transcript === lastTranscriptRef.current) return;
+        lastTranscriptRef.current = transcript;
+        setPrompt((prev) => (prev ? `${prev} ${transcript}` : transcript));
+        recognition.stop(); // stop after a final result to avoid duplicate firing
+      };
+
+      recognition.start();
+      setRecognizer(recognition);
+    } catch (error) {
+      setIsListening(false);
+      enqueueSnackbar("Mic access failed. Check permissions and try again.", { variant: "error" });
+    }
+  };
+
+  const stopDictation = () => {
+    if (recognizer) {
+      recognizer.stop();
+    }
+  };
+
   return (
     <Stack spacing={4} sx={{ p: 3 }}>
       <Typography variant="h4" fontWeight={700}>
@@ -86,6 +144,13 @@ export default function CreateVideo() {
             <Typography variant="h6" fontWeight={700}>
               Video Prompt
             </Typography>
+            <Chip
+              label={isListening ? "Listening..." : "Use mic"}
+              size="small"
+              color={isListening ? "secondary" : "default"}
+              sx={{ ml: 1, fontWeight: 600 }}
+              icon={isListening ? <StopCircleOutlinedIcon fontSize="small" /> : <MicNoneOutlinedIcon fontSize="small" />}
+            />
           </Stack>
 
           <TextField
@@ -96,6 +161,15 @@ export default function CreateVideo() {
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             fullWidth
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={isListening ? stopDictation : startDictation} aria-label="dictate prompt">
+                    {isListening ? <StopCircleOutlinedIcon color="secondary" /> : <MicNoneOutlinedIcon />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
 
           <Button

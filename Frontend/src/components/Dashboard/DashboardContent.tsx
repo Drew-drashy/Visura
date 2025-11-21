@@ -17,13 +17,13 @@ const workflowCards = [
     accent: '#6750A4',
   },
   {
-    title: 'Voice Over Studio',
+    title: 'Voice Over Studio (Upcoming)',
     description: 'Personalize voiceovers with multilingual, emotionally aware AI narration.',
     icon: <RecordVoiceOverOutlinedIcon fontSize="large" />,
     accent: '#4dd0e1',
   },
   {
-    title: 'Asset Remix',
+    title: 'Asset Remix (Upcoming)',
     description: 'Blend uploaded media with generated assets for quick iteration and remixing.',
     icon: <ImageOutlinedIcon fontSize="large" />,
     accent: '#ffb74d',

@@ -14,6 +14,8 @@ import {
   Typography,
 } from '@mui/material';
 import type { SidebarItemConfig, SidebarSectionConfig } from './sidebarConfig';
+import { useAppSelector } from '../../store/hooks';
+import { selectCurrentUser } from '../../features/auth/selectors';
 
 type SidebarSectionListProps = {
   title: string;
@@ -117,34 +119,7 @@ const Sidebar = ({ variant, open, onClose, width, sections, selectedItemId, onSe
         />
       </Toolbar>
 
-      <Stack
-        direction="row"
-        spacing={1.5}
-        alignItems="center"
-        sx={{
-          paddingX: 1,
-          paddingY: 1.5,
-          borderRadius: 3,
-          backgroundColor: 'var(--card-bg)',
-          border: `1px solid var(--muted-color)`,
-          boxShadow: `0 18px 40px -24px var(--shadow-color)`,
-        }}
-      >
-        <Avatar
-          alt="Ayan Sharma"
-          sx={{ width: 44, height: 44, bgcolor: 'var(--accent-color)', color: '#fff', fontWeight: 600 }}
-        >
-          AS
-        </Avatar>
-        <Box>
-          <Typography variant="subtitle1" fontWeight={600}>
-            Ayan Sharma
-          </Typography>
-          <Typography variant="body2" color="inherit" sx={{ opacity: 0.8 }}>
-            Creative Producer
-          </Typography>
-        </Box>
-      </Stack>
+      <UserCard />
 
       <Box sx={{ flex: 1, overflowY: 'auto', px: 1 }}>
         {sections.map((section, index) => (
@@ -185,3 +160,46 @@ const Sidebar = ({ variant, open, onClose, width, sections, selectedItemId, onSe
   );
 
 export default Sidebar;
+const UserCard = () => {
+  const user = useAppSelector(selectCurrentUser);
+  const initials =
+    user?.name
+      ?.split(' ')
+      .filter(Boolean)
+      .map((part) => part[0]?.toUpperCase())
+      .join('')
+      .slice(0, 2) || 'VS';
+
+  return (
+    <Stack
+      direction="row"
+      spacing={1.5}
+      alignItems="center"
+      sx={{
+        paddingX: 1,
+        paddingY: 1.5,
+        borderRadius: 3,
+        backgroundColor: 'var(--card-bg)',
+        border: `1px solid var(--muted-color)`,
+        boxShadow: `0 18px 40px -24px var(--shadow-color)`,
+        flexWrap: 'wrap',
+      }}
+    >
+      <Avatar
+        alt={user?.name || 'User'}
+        src={user?.avatarUrl}
+        sx={{ width: 44, height: 44, bgcolor: 'var(--accent-color)', color: '#fff', fontWeight: 600 }}
+      >
+        {initials}
+      </Avatar>
+      <Box sx={{ minWidth: 0 }}>
+        <Typography variant="subtitle1" fontWeight={600} noWrap>
+          {user?.name || 'Your name'}
+        </Typography>
+        <Typography variant="body2" color="inherit" sx={{ opacity: 0.8 }} noWrap>
+          {user?.email || 'Add your email'}
+        </Typography>
+      </Box>
+    </Stack>
+  );
+};
