@@ -1,6 +1,9 @@
 import Video from "../models/Video.js";
 import { videoQueue } from "../jobs/queue.js";
 import User from "../models/User.js";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export const generateVideo = async (req, res) => {
   try {
@@ -31,6 +34,36 @@ export const generateVideo = async (req, res) => {
     res.status(500).json({ error: "Failed to enqueue video generation" });
   }
 };
+
+export const streamMyVideos = async (req, res) => {
+  const userId = req.user.id;
+  if (!userId) return res.status(401).end();
+
+  res.writeHead(200, {
+    "Content-Type": "text/event-stream",
+    "Cache-Control": "no-cache",
+    Connection: "keep-alive",
+  });
+
+  const sendEvent = (payload) => {
+    res.write(`data: ${JSON.stringify(payload)}\n\n`);
+  };
+
+  const pushSnapshot = async () => {
+    const videos = await Video.find({ userId }).sort({ createdAt: -1 }).lean();
+    sendEvent({ type: "videos", videos, count: videos.length });
+  };
+
+  await pushSnapshot();
+
+  const intervalMs = Number(process.env.VIDEO_SSE_POLL_MS || 4000);
+  const interval = setInterval(pushSnapshot, intervalMs);
+
+  req.on("close", () => {
+    clearInterval(interval);
+  });
+};
+
 export const videoWebhook = async (req, res) => {
   try {
     console.log('hiiiii im webhookkkkk')

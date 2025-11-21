@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import type { AuthResponse, AuthState } from '../types';
+import type { AuthResponse, AuthState, AuthTokens, AuthUser } from '../types';
 
 const initialState: AuthState = {
   user: null,
@@ -19,15 +19,30 @@ const authSlice = createSlice({
   reducers: {
     // Save tokens + user → also persist in localStorage
     setCredentials: (state, action: PayloadAction<AuthResponse>) => {
-      console.log(action)
       state.user = action.payload.user;
-      state.tokens = action.payload.accessToken;
+      state.tokens = {
+        accessToken: action.payload.accessToken,
+        refreshToken: action.payload.refreshToken,
+      };
       state.status = 'succeeded';
       state.error = null;
 
       // save to localStorage
-      localStorage.setItem("auth_tokens", JSON.stringify(action.payload.accessToken));
+      localStorage.setItem("auth_tokens", JSON.stringify(state.tokens));
       localStorage.setItem("auth_user", JSON.stringify(action.payload.user));
+    },
+
+    // Update only the tokens (used after refresh)
+    setTokens: (state, action: PayloadAction<AuthTokens>) => {
+      state.tokens = action.payload;
+      state.status = 'succeeded';
+      localStorage.setItem("auth_tokens", JSON.stringify(action.payload));
+    },
+
+    // Update user profile without touching tokens
+    setUser: (state, action: PayloadAction<AuthUser>) => {
+      state.user = action.payload;
+      localStorage.setItem("auth_user", JSON.stringify(action.payload));
     },
 
     // Remove everything (Redux + localStorage)
@@ -50,7 +65,13 @@ const authSlice = createSlice({
       const storedTokens = localStorage.getItem("auth_tokens");
       const storedUser = localStorage.getItem("auth_user");
 
-      if (storedTokens) state.tokens = JSON.parse(storedTokens);
+      if (storedTokens) {
+        const parsed = JSON.parse(storedTokens);
+        state.tokens =
+          typeof parsed === 'string'
+            ? { accessToken: parsed }
+            : parsed;
+      }
       if (storedUser) state.user = JSON.parse(storedUser);
 
       if (storedTokens || storedUser) state.status = "succeeded";
@@ -58,5 +79,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, setCredentials, setAuthError, restoreSession } = authSlice.actions;
+export const { logout, setCredentials, setTokens, setUser, setAuthError, restoreSession } = authSlice.actions;
 export default authSlice.reducer;

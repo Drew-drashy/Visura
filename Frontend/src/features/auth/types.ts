@@ -2,6 +2,7 @@ export type AuthUser = {
   id: string;
   name: string;
   email: string;
+  credits?: number;
   role?: string;
   avatarUrl?: string;
 };
@@ -36,6 +37,18 @@ export type SignupRequest = {
 
 export type AuthResponse = {
   user: AuthUser;
-  accessToken: AuthTokens;
+  accessToken: string;
+  refreshToken: string;
 };
 
+export type VideoItem = {
+  _id: string;
+  userId?: string;
+  prompt: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  error?: string;
+  thumbnailUrl?: string;
+  progress?: number;
+};

@@ -1,10 +1,13 @@
-import { Box, Card, CardContent, Chip, Divider, LinearProgress, Stack, Typography, alpha, useTheme } from '@mui/material';
+import { Box, Card, CardContent, Chip, Divider, LinearProgress, Stack, Typography, alpha, useTheme, Skeleton } from '@mui/material';
 
 import VideoLibraryOutlinedIcon from '@mui/icons-material/VideoLibraryOutlined';
 import BoltOutlinedIcon from '@mui/icons-material/BoltOutlined';
 import RecordVoiceOverOutlinedIcon from '@mui/icons-material/RecordVoiceOverOutlined';
 import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
 import CloudSyncOutlinedIcon from '@mui/icons-material/CloudSyncOutlined';
+import { useAppSelector } from '../../store/hooks';
+import { selectAuthState, selectCurrentUser } from '../../features/auth/selectors';
+import { useGetVideosQuery } from '../../features/auth/api/authApi';
 
 const workflowCards = [
   {
@@ -30,6 +33,15 @@ const workflowCards = [
 const DashboardContent = () => {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
+  const user = useAppSelector(selectCurrentUser);
+  const credits = user?.credits ?? 0;
+  const { tokens } = useAppSelector(selectAuthState);
+  const { data: videoData, isLoading: videosLoading } = useGetVideosQuery(undefined, {
+    skip: !tokens?.accessToken,
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+  });
+  const recentVideos = (videoData?.videos ?? []).slice(0, 3);
   
 
   return (
@@ -82,14 +94,14 @@ const DashboardContent = () => {
               </Typography>
             </Stack>
             <Typography variant="h2" fontWeight={700} sx={{ mt: 1 }}>
-              74
+              {credits}
               <Typography component="span" variant="subtitle2" sx={{ ml: 1, opacity: 0.6 }}>
                 remaining
               </Typography>
             </Typography>
             <LinearProgress
               variant="determinate"
-              value={74}
+              value={Math.min(credits, 100)}
               sx={{
                 mt: 2,
                 height: 8,
@@ -176,44 +188,57 @@ const DashboardContent = () => {
           <Box sx={{ flex: 1 }}>
             <Stack direction="row" alignItems="center" justifyContent="space-between">
               <Typography variant="h5" fontWeight={700}>
-                Recent projects
+                Recent videos
               </Typography>
               <Chip label="View all" variant="outlined" sx={{ borderRadius: 999, fontWeight: 600 }} clickable />
             </Stack>
 
             <Stack spacing={2.5} sx={{ mt: 3 }}>
-              {[
-                { title: 'NeoSynth launch trailer', status: 'Rendering', progress: 68 },
-                { title: 'Aurora festival recap', status: 'In review', progress: 100 },
-                { title: 'Product walkthrough v2', status: 'Draft', progress: 32 },
-              ].map((project) => (
-                <Box key={project.title}>
-                  <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
-                    <Typography fontWeight={600}>{project.title}</Typography>
-                    <Chip
-                      label={project.status}
-                      size="small"
+              {(videosLoading ? Array.from({ length: 3 }) : recentVideos).map((video, idx) => {
+                const status = videosLoading ? 'loading' : video?.status?.toLowerCase();
+                const progressValue = status === 'completed' ? 100 : status === 'processing' ? 60 : 20;
+                const statusColor =
+                  status === 'completed'
+                    ? theme.palette.success.main
+                    : status === 'failed'
+                      ? theme.palette.error.main
+                      : theme.palette.secondary.main;
+
+                return (
+                  <Box key={videosLoading ? idx : video._id}>
+                    <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+                      <Typography fontWeight={600}>
+                        {videosLoading ? <Skeleton width={220} /> : video.prompt}
+                      </Typography>
+                      {videosLoading ? (
+                        <Skeleton width={80} height={24} />
+                      ) : (
+                        <Chip
+                          label={status === 'completed' ? 'Completed' : status === 'failed' ? 'Failed' : 'Processing'}
+                          size="small"
+                          sx={{
+                            backgroundColor: alpha(statusColor, isDark ? 0.26 : 0.14),
+                            color: statusColor,
+                            fontWeight: 600,
+                          }}
+                        />
+                      )}
+                    </Stack>
+                    <LinearProgress
+                      variant="determinate"
+                      value={videosLoading ? 40 : progressValue}
                       sx={{
-                        backgroundColor: alpha(theme.palette.secondary.main, isDark ? 0.26 : 0.14),
-                        color: theme.palette.secondary.main,
-                        fontWeight: 600,
+                        height: 6,
+                        borderRadius: 999,
+                        backgroundColor: alpha(statusColor, 0.12),
+                        '& .MuiLinearProgress-bar': {
+                          borderRadius: 999,
+                        },
                       }}
                     />
-                  </Stack>
-                  <LinearProgress
-                    variant="determinate"
-                    value={project.progress}
-                    sx={{
-                      height: 6,
-                      borderRadius: 999,
-                      backgroundColor: alpha(theme.palette.secondary.main, 0.1),
-                      '& .MuiLinearProgress-bar': {
-                        borderRadius: 999,
-                      },
-                    }}
-                  />
-                </Box>
-              ))}
+                  </Box>
+                );
+              })}
             </Stack>
           </Box>
 
@@ -263,5 +288,3 @@ const DashboardContent = () => {
 };
 
 export default DashboardContent;
-
-

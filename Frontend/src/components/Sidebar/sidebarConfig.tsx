@@ -35,9 +35,9 @@ export const sidebarSections: SidebarSectionConfig[] = [
     items: [
       { id: 'overview', label: 'Overview', icon: DashboardOutlinedIcon, component: OverviewView, path: '/' },
       { id: 'create-video', label: 'Create Video', icon: PlayCircleOutlineOutlinedIcon, component: CreateVideoView, path: '/create-video' },
-      { id: 'story-builder', label: 'Story Builder', icon: AutoStoriesOutlinedIcon, component: StoryBuilderView, path: '/story-builder' },
+      // { id: 'story-builder', label: 'Story Builder', icon: AutoStoriesOutlinedIcon, component: StoryBuilderView, path: '/story-builder' },
       { id: 'media-library', label: 'Media Library', icon: StorageOutlinedIcon, component: MediaLibraryView, path: '/media-library' },
-      { id: 'analytics', label: 'Analytics', icon: InsightsOutlinedIcon, component: AnalyticsView, path: '/analytics' },
+      // { id: 'analytics', label: 'Analytics', icon: InsightsOutlinedIcon, component: AnalyticsView, path: '/analytics' },
     ],
   },
   {

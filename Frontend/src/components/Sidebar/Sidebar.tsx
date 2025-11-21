@@ -1,4 +1,3 @@
-import type { ElementType } from 'react';
 import {
   Avatar,
   Box,
@@ -14,13 +13,13 @@ import {
   Toolbar,
   Typography,
 } from '@mui/material';
-import type { SidebarSectionConfig } from './sidebarConfig';
+import type { SidebarItemConfig, SidebarSectionConfig } from './sidebarConfig';
 
 type SidebarSectionListProps = {
   title: string;
-  items: { id: string; label: string; icon: ElementType }[];
+  items: SidebarItemConfig[];
   selectedItemId: string;
-  onSelect: (itemId: string) => void;
+  onSelect: (item: SidebarItemConfig) => void;
   showDivider: boolean;
 };
 
@@ -68,7 +67,7 @@ type SidebarProps = {
   width: number;
   sections: SidebarSectionConfig[];
   selectedItemId: string;
-  onSelectItem: (itemId: string) => void;
+  onSelectItem: (item: SidebarItemConfig) => void;
 } & Pick<DrawerProps, 'variant' | 'open' | 'onClose'>;
 
 const Sidebar = ({ variant, open, onClose, width, sections, selectedItemId, onSelectItem }: SidebarProps) => (
@@ -160,7 +159,7 @@ const Sidebar = ({ variant, open, onClose, width, sections, selectedItemId, onSe
         ))}
       </Box>
 
-      <Box
+      {/* <Box
         sx={{
           p: 2,
           borderRadius: 3,
@@ -181,7 +180,7 @@ const Sidebar = ({ variant, open, onClose, width, sections, selectedItemId, onSe
           sx={{ mt: 2, fontWeight: 600, borderRadius: 99 }}
           clickable
         />
-      </Box>
+      </Box> */}
     </Drawer>
   );
 

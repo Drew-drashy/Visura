@@ -17,13 +17,14 @@ import {
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import GoogleIcon from '@mui/icons-material/Google';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink,useNavigate } from 'react-router-dom';
 import { useLoginMutation } from './api/authApi';
 import { useForm } from 'react-hook-form';
 import { useSnackbar } from 'notistack';
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const navigate=useNavigate();
    const { enqueueSnackbar } = useSnackbar();
       const [login, { isLoading }] = useLoginMutation();
       const {
@@ -40,7 +41,8 @@ export default function LoginPage() {
        const onSubmit = async (data : any ) => {
          try {
     const res = await login(data).unwrap(); 
-    console.log("Logged in:", res);
+    navigate('/');
+    // console.log("Logged in:", res);
      enqueueSnackbar("Logged in successfully!", {
       variant: "success",
     });
@@ -113,7 +115,7 @@ export default function LoginPage() {
               label="Email address"
               type="email"
               placeholder="you@company.com"
-              {...register("email", { required: "First name is required" })}
+              {...register("email", { required: "Email is required" })}
               fullWidth
               variant="outlined"
             />
@@ -166,5 +168,4 @@ export default function LoginPage() {
     </Box>
   );
 };
-
 

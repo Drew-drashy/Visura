@@ -2,7 +2,9 @@ import jwt from 'jsonwebtoken';
 
 export function authRequired(req, res, next) {
   const header = req.headers.authorization || '';
-  const token = header.startsWith('Bearer ') ? header.split(' ')[1] : null;
+  const tokenFromHeader = header.startsWith('Bearer ') ? header.split(' ')[1] : null;
+  const tokenFromQuery = req.query.token;
+  const token = tokenFromHeader || tokenFromQuery;
 
   if (!token) {
     return res.status(401).json({ error: 'Unauthorized: missing token' });
