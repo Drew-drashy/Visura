@@ -1,8 +1,14 @@
 import { Router } from 'express';
 import {
-  register, login, googleAuth,
-  refresh, logout, me,
-  forgotPassword, resetPassword
+  register,
+  login,
+  googleAuth,
+  refresh,
+  logout,
+  me,
+  updateMe,
+  forgotPassword,
+  resetPassword,
 } from '../controllers/authController.js';
 import {authRequired}  from '../middleware/auth.js';
 
@@ -21,6 +27,7 @@ router.post('/logout', logout);
 
 // user
 router.get('/me', authRequired, me);
+router.put('/me', authRequired, updateMe);
 
 // password reset
 router.post('/forgot', forgotPassword);

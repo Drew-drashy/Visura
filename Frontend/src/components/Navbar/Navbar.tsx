@@ -3,9 +3,15 @@ import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined';
 import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import { AppBar, Box, Button, Chip, IconButton, Stack, Toolbar, Typography } from '@mui/material';
+import Badge from '@mui/material/Badge';
 import { alpha } from '@mui/material/styles';
 import { useThemeMode } from '../../theme/ThemeModeProvider';
 import { Link as RouterLink } from 'react-router-dom';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { selectCurrentUser, selectIsAuthenticated } from '../../features/auth/selectors';
+import { logout } from '../../features/auth/slice/authSlice';
+import { useLogoutMutation, useLazyGetVideosQuery, useGetVideosQuery } from '../../features/auth/api/authApi';
+import { useSnackbar } from 'notistack';
 
 type NavbarProps = {
   onMenuClick: () => void;
@@ -14,6 +20,42 @@ type NavbarProps = {
 
 const Navbar = ({ onMenuClick, sidebarWidth }: NavbarProps) => {
   const { mode, toggleMode } = useThemeMode();
+  const dispatch = useAppDispatch();
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const currentUser = useAppSelector(selectCurrentUser);
+  const [triggerLogout, { isLoading: isLoggingOut }] = useLogoutMutation();
+  const [fetchVideos] = useLazyGetVideosQuery();
+  const { enqueueSnackbar } = useSnackbar();
+  const { data: videosData } = useGetVideosQuery(undefined, {
+    skip: !isAuthenticated,
+    pollingInterval: 10000,
+  });
+  const pendingCount =
+    videosData?.videos?.filter((v) => ['processing', 'queued'].includes(v.status?.toLowerCase?.() || '')).length ?? 0;
+
+  const handleLogout = async () => {
+    try {
+      await triggerLogout().unwrap();
+    } catch (error) {
+      console.error('Logout failed', error);
+    } finally {
+      dispatch(logout());
+    }
+  };
+
+  const handleNotifications = async () => {
+    try {
+      const res = await fetchVideos().unwrap();
+      const latest = res?.videos?.slice(0, 3) ?? [];
+      const message =
+        latest.length === 0
+          ? 'No video activity yet.'
+          : latest.map((v) => `${v.prompt} • ${v.status}`).join('\n');
+      enqueueSnackbar(message, { variant: 'info', autoHideDuration: 4000 });
+    } catch (error) {
+      enqueueSnackbar('Could not fetch notifications.', { variant: 'error' });
+    }
+  };
 
   return (
     <AppBar
@@ -60,27 +102,56 @@ const Navbar = ({ onMenuClick, sidebarWidth }: NavbarProps) => {
         </Stack>
 
         <Stack direction="row" spacing={1} alignItems="center">
-          <IconButton color="inherit">
-            <NotificationsNoneOutlinedIcon />
+          <IconButton color="inherit" onClick={handleNotifications}>
+            <Badge
+              color="secondary"
+              badgeContent={pendingCount > 0 ? pendingCount : 0}
+              overlap="circular"
+              invisible={!pendingCount}
+            >
+              <NotificationsNoneOutlinedIcon />
+            </Badge>
           </IconButton>
           <IconButton color="inherit" onClick={toggleMode}>
             {mode === 'dark' ? <LightModeOutlinedIcon /> : <DarkModeOutlinedIcon />}
           </IconButton>
-          <Button
-            variant="contained"
-            color="primary"
-            component={RouterLink}
-            to="/login"
-            sx={{
-              fontWeight: 600,
-              borderRadius: 999,
-              textTransform: 'none',
-              px: 2.5,
-              boxShadow: 'none',
-            }}
-          >
-            Sign in
-          </Button>
+          {isAuthenticated ? (
+            <Stack direction="row" spacing={1} alignItems="center">
+              {/* <Typography variant="body2" fontWeight={600} sx={{ display: { xs: 'none', sm: 'inline-flex' } }}>
+                {currentUser?.name ?? 'Logged in'}
+              </Typography> */}
+              <Button
+                variant="outlined"
+                color="inherit"
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+                sx={{
+                  fontWeight: 700,
+                  borderRadius: 999,
+                  textTransform: 'none',
+                  px: 2,
+                }}
+              >
+                {isLoggingOut ? 'Signing out...' : 'Logout'}
+              </Button>
+            </Stack>
+          ) : (
+            <Button
+              variant="contained"
+              color="primary"
+              component={RouterLink}
+              to="/login"
+              sx={{
+                fontWeight: 600,
+                borderRadius: 999,
+                textTransform: 'none',
+                px: 2.5,
+                boxShadow: 'none',
+              }}
+            >
+              Sign in
+            </Button>
+          )}
         </Stack>
       </Toolbar>
     </AppBar>
@@ -88,5 +159,3 @@ const Navbar = ({ onMenuClick, sidebarWidth }: NavbarProps) => {
 };
 
 export default Navbar;
-
-

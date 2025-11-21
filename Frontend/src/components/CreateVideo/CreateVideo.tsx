@@ -12,26 +12,57 @@ import {
 } from "@mui/material";
 import MovieCreationOutlinedIcon from "@mui/icons-material/MovieCreationOutlined";
 import BoltOutlinedIcon from "@mui/icons-material/BoltOutlined";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { authApiUtils } from "../../features/auth/api/authApi";
+import { selectAuthState } from "../../features/auth/selectors";
+import { VIDEO_GENERATE_URL } from "../../constants/url";
+import { useSnackbar } from "notistack";
 
 export default function CreateVideo() {
+  const dispatch = useAppDispatch();
+  const { enqueueSnackbar } = useSnackbar();
+  const { tokens } = useAppSelector(selectAuthState);
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!prompt.trim()) return;
-    setIsGenerating(true);
-    setProgress(0);
+    if (!tokens?.accessToken) {
+      enqueueSnackbar("Please sign in to generate a video.", { variant: "warning" });
+      return;
+    }
 
-    const interval = setInterval(() => {
-      setProgress((p) => {
-        if (p >= 100) {
-          clearInterval(interval);
-          return 100;
-        }
-        return p + 5;
+    setIsGenerating(true);
+    setProgress(25);
+
+    try {
+      const response = await fetch(VIDEO_GENERATE_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${tokens.accessToken}`,
+        },
+        body: JSON.stringify({ prompt }),
+        credentials: "include",
       });
-    }, 200);
+
+      if (!response.ok) {
+        const message = await response.text();
+        throw new Error(message || "Failed to start video generation");
+      }
+
+      // Kick off profile refresh (credits) and finish progress
+      setProgress(100);
+      enqueueSnackbar("Video generation started. We’ll notify you when it’s ready.", { variant: "success" });
+      dispatch(authApiUtils.invalidateTags(["Auth", "Videos"]));
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Failed to start video generation";
+      enqueueSnackbar(message, { variant: "error" });
+      setProgress(0);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (

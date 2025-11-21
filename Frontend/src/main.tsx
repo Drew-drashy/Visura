@@ -11,7 +11,6 @@ import { store } from "./store/store.ts";
 import { SnackbarProvider } from 'notistack';
 
 
-
 createRoot(document.getElementById('root')!).render(
 
   <Provider store={store}>

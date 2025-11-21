@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState} from 'react';
 import {
   Box,
   Card,
@@ -16,13 +16,14 @@ import {
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import GoogleIcon from '@mui/icons-material/Google';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 
 import { useForm } from 'react-hook-form';
 import { useSignupMutation } from './api/authApi';
 import { useSnackbar } from 'notistack';
 
 const SignupPage = () => {
+  const navigate=useNavigate();
   const [showPassword, setShowPassword] = useState(false);
 
   const { enqueueSnackbar } = useSnackbar();
@@ -56,9 +57,7 @@ const SignupPage = () => {
       enqueueSnackbar("Account created successfully!", {
         variant: "success",
       });
-
-      // redirect if needed
-      // navigate("/login");
+      navigate("/login");
 
     } catch (err: any) {
       enqueueSnackbar(err?.data?.message || "Signup failed", {

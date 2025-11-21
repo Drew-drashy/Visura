@@ -7,6 +7,7 @@ import OAuthAccount from '../models/OAuthAccount.js';
 import PasswordReset from '../models/PasswordReset.js';
 import { signAccessToken, generateRefreshToken } from '../utils/tokens.js';
 import { sendPasswordResetEmail } from '../services/email.js';
+import mongoose from 'mongoose';
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -167,6 +168,28 @@ export async function me(req, res, next) {
     if (!user) return res.status(404).json({ error: 'Not found' });
     res.json({ id: String(user._id), email: user.email, name: user.name, credits: user.credits, createdAt: user.createdAt });
   } catch (e) { respondWithError(res, e, 'Failed to fetch profile'); }
+}
+
+export async function updateMe(req, res, next) {
+  try {
+    const { name, email } = req.body;
+    const userId = req.user.id;
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const updates = {};
+    if (typeof name === 'string' && name.trim()) updates.name = name.trim();
+    if (typeof email === 'string' && email.trim()) updates.email = email.trim().toLowerCase();
+
+    if (updates.email) {
+      const existing = await User.findOne({ email: updates.email, _id: { $ne: new mongoose.Types.ObjectId(userId) } });
+      if (existing) return res.status(400).json({ error: 'Email already in use' });
+    }
+
+    const user = await User.findByIdAndUpdate(userId, { $set: updates }, { new: true, lean: true });
+    if (!user) return res.status(404).json({ error: 'Not found' });
+
+    res.json({ id: String(user._id), email: user.email, name: user.name, credits: user.credits, createdAt: user.createdAt });
+  } catch (e) { respondWithError(res, e, 'Failed to update profile'); }
 }
 
 export async function forgotPassword(req, res, next) {

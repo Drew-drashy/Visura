@@ -2,6 +2,7 @@ import CreateVideo from '../components/CreateVideo/CreateVideo';
 import DashboardContent from '../components/Dashboard/DashboardContent';
 import MediaLibrary from '../components/MediaLibrary/MediaLibrary';
 import SectionPlaceholder from './SectionPlaceholder';
+import ProfileSettings from '../components/Settings/ProfileSettings';
 
 export const OverviewView = () => (
   <DashboardContent
@@ -39,10 +40,7 @@ export const UploadAssetsView = () => (
 );
 
 export const SettingsView = () => (
-  <SectionPlaceholder
-    title="Settings"
-    description="Configure workspace preferences, billing, permissions, and integrations."
-  />
+  <ProfileSettings />
 );
 
 export const HelpSupportView = () => (
@@ -51,4 +49,3 @@ export const HelpSupportView = () => (
     description="Find documentation, contact support, or join the community for inspiration."
   />
 );
-
