@@ -42,6 +42,7 @@ export default function CreateVideo() {
   const [isListening, setIsListening] = useState(false);
   const [recognizer, setRecognizer] = useState<SpeechRecognition | null>(null);
   const lastTranscriptRef = useRef<string>("");
+  const shouldResumeRef = useRef(false);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
@@ -89,24 +90,31 @@ export default function CreateVideo() {
     }
     try {
       const recognition = new SpeechRecognition();
-      recognition.continuous = false;
+      recognition.continuous = true;
       recognition.lang = "en-US";
-      recognition.interimResults = false;
+      recognition.interimResults = true;
+      shouldResumeRef.current = true;
 
       recognition.onstart = () => setIsListening(true);
-      recognition.onend = () => setIsListening(false);
+      recognition.onend = () => {
+        setIsListening(false);
+        if (shouldResumeRef.current) {
+          recognition.start();
+        }
+      };
       recognition.onerror = () => {
         setIsListening(false);
         enqueueSnackbar("Could not capture audio. Please try again.", { variant: "error" });
       };
       recognition.onresult = (event) => {
-        const result = event.results[event.resultIndex];
-        const transcript = result?.[0]?.transcript?.trim?.();
-        if (!transcript) return;
-        if (transcript === lastTranscriptRef.current) return;
-        lastTranscriptRef.current = transcript;
-        setPrompt((prev) => (prev ? `${prev} ${transcript}` : transcript));
-        recognition.stop(); // stop after a final result to avoid duplicate firing
+        for (let i = event.resultIndex; i < event.results.length; i += 1) {
+          const result = event.results[i];
+          if (!result.isFinal) continue;
+          const transcript = result[0]?.transcript?.trim?.();
+          if (!transcript || transcript === lastTranscriptRef.current) continue;
+          lastTranscriptRef.current = transcript;
+          setPrompt((prev) => (prev ? `${prev} ${transcript}` : transcript));
+        }
       };
 
       recognition.start();
@@ -119,6 +127,7 @@ export default function CreateVideo() {
 
   const stopDictation = () => {
     if (recognizer) {
+      shouldResumeRef.current = false;
       recognizer.stop();
     }
   };
